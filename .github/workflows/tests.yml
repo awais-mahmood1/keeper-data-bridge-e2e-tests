@@ -1,0 +1,26 @@
+name: api-health-tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+      - name: Run healthcheck
+        env:
+          API_BASE_URL: https://ls-keeper-data-bridge-backend.dev.cdp-int.defra.cloud
+          HEALTH_PATH: /health
+          AUTH_TYPE: None
+        run: |
+          . .venv/bin/activate
+          pytest -q -k test_health --maxfail=1 --disable-warnings
